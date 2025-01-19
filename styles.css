@@ -1,34 +1,37 @@
-/* Global reset & base styling */
+/* 1) Global reset & base styling */
 body {
   font-family: 'Poppins', sans-serif;
-  background: #f7f9fc;
+  background: #89A8B2; /* Glavna pozadina */
   margin: 0;
   padding: 0;
-  color: #333;
+  color: #333; /* Osnovna boja teksta */
 }
 
+/* Kontejner */
 .container {
-  max-width: 700px;
-  margin: 40px auto;    /* centrirano */
+  max-width: 640px;
+  margin: 30px auto;
   padding: 20px;
-  background: #fff;
+  background: #ffffff;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
+/* Naslov */
 h1 {
   margin-top: 0;
-  text-align: center;
-  color: #4a90e2;
+  font-size: 1.6rem;
   font-weight: 600;
+  color: #333;
+  text-align: center;
 }
 
-/* The area where we place multiple calculators */
+/* Područje gde smestamo calc-blockove */
 #calcContainer {
   margin-top: 20px;
 }
 
-/* The bottom row with 2 buttons */
+/* Donji row za Add i Reset */
 .bottom-btns-row {
   display: flex;
   justify-content: space-between;
@@ -36,94 +39,144 @@ h1 {
   margin-top: 20px;
 }
 
-/* The "Add New Calculator" and "Reset All" button */
-.btn {
-  display: inline-block;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 5px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s ease, opacity 0.2s ease;
-}
-.btn:hover {
-  opacity: 0.9;
-}
-.red-btn {
-  background: #e74c3c;
-  color: #fff;
-}
-
-/* Each calculator block */
+/* 2) Kalkulator (calc-block) sa fadeIn */
 .calc-block {
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background: #fafafa;
   margin-bottom: 20px;
+  background: #fcfcfc; /* lagano bela/siva za blok */
+  border: 1px solid #ddd;
+  border-radius: 6px;
   padding: 10px;
+
+  /* Pri kreiranju se pokreće fadeIn */
+  animation: fadeIn 0.3s ease-out forwards;
   position: relative;
 }
 
-/* Collapsed row (the single-line summary) */
+/* KEYFRAMES FOR FADE-IN/FADE-OUT */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+}
+
+/* Ako elementu dodelimo .fade-out, pokreće se fadeOut */
+.fade-out {
+  animation: fadeOut 0.3s ease-in forwards;
+}
+
+/* Naslov u kalkulatoru */
+.calc-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #89A8B2; /* ili po želji */
+}
+
+.save {
+  background-color: #ee5253 !important;
+}
+
+/* Collapsed row */
 .collapsed-row {
-  background: #f1f1f1;
+  background: white; /* Plava traka kad je collapsed */
   border-radius: 5px;
   padding: 8px;
   margin-top: 5px;
-  display: flex; 
+  display: flex;
   align-items: center;
   justify-content: space-between;
 }
 .collapsed-row .btn {
-  margin-left: 8px; /* razmak */
+  margin-left: 8px;
 }
 
-/* Hidden utility class */
-.hidden {
-  display: none;
-}
-
-/* Title inside the block */
-.calc-title {
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: #4a90e2;
-}
-
-/* First iteration (area input) */
+/* First iteration + findBtn */
 .first-iteration label {
   display: block;
   font-weight: 600;
   margin: 10px 0 5px;
+  color: #555;
 }
 .first-iteration input {
   width: 30%;
   padding: 8px;
-  border-radius: 4px;
   border: 1px solid #ccc;
+  border-radius: 4px;
 }
+
+/* 3) Dugmad */
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  transition: background 0.2s ease, opacity 0.2s ease;
+  margin-right: 10px;
+  color: #fff; /* Tekst na dugmetu */
+}
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* Primarna plava (umesto "calculate-btn" ili "red-btn") */
+.primary {
+  background-color: #608BC1;
+}
+
+/* Recimo crvena za brisanje (remove-btn) */
+.remove-btn {
+  background-color: #ee5253;
+  color: #fff;
+}
+
+/* Ako koristite klasu .red-btn, možemo je mapirati na primary ili remove, po želji */
+.red-btn {
+  background-color: #608BC1;
+}
+
+/* Example za findBtn ili calculate */
 #findBtn {
-  display: block;
-  width: 32.5%;
-  margin-top: 10px;
-  padding: 10px;
-  background: #4a90e2;
+  display: inline-block;
+  padding: 7px 10px;
+  background-color: #608BC1; /* Isto kao dugmad "Add New Calculator" */
   color: #fff;
   border: none;
   border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: background 0.2s ease, opacity 0.2s ease;
 }
 #findBtn:hover {
-  background-color: #357abd;
+  background-color: #4a6fa5; /* Tamnija nijansa pri hoveru */
 }
 
-/* UL defaults: no bullets, no left padding */
-ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* Light-blue */
+.light-blue-btn {
+  background: #cce5ff;
+  color: #333;
+  border: 1px solid #99ccff;
 }
 
+/* Drugi row: results i sl. (vec obuhvaceno) */
 /* result items */
 .result-item {
   background: #ececec;
@@ -131,29 +184,27 @@ ul {
   padding: 8px;
   border-radius: 4px;
   cursor: pointer;
+  color: #333;
 }
 .result-item:hover {
   background: #ddd;
 }
 .result-item.selected {
-  background: #ffecec;
+  background: #fae4e4; /* svetlo zuta kad je selektovan */
 }
 
-/* Samo .series-code je crveno kad je selected */
+/* Samo .series-code crveno */
 .result-item.selected .series-code {
-  color: red;
+  color: #d21f3c;
   font-weight: bold;
-}
-.result-item.selected .area-val {
-  color: inherit; /* ostaje neutralno */
 }
 
 /* Collapsible "Adjust search" */
 .refine-header {
-  cursor: pointer; 
-  color: #4a90e2; 
+  cursor: pointer;
   margin: 10px 0;
   font-weight: 600;
+  color: #155E95;
 }
 .refine-header span.arrow {
   margin-left: 5px;
@@ -162,7 +213,7 @@ ul {
   display: none;
 }
 
-/* Select i clear-dugme unutar .select-wrapper */
+/* Select + clear dugme */
 .select-wrapper {
   position: relative;
   display: inline-block;
@@ -171,15 +222,15 @@ ul {
 }
 .select-wrapper select {
   width: 100%;
-  padding: 6px 30px 6px 6px; /* extra space da stane X */
-  border: 1px solid #ccc;
+  padding: 6px 8px;
   border-radius: 4px;
+  border: 1px solid #ccc;
 }
 .clear-btn {
   position: absolute;
   right: 5px;
-  top: 5px;
-  background: #e74c3c; /* crvena pozadina */
+  top: 8px;
+  background: #ee5253;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -187,15 +238,13 @@ ul {
   padding: 2px 6px;
   font-size: 0.8rem;
   line-height: 1;
-  display: none; /* pojavi se ako user izabere nesto */
+  display: none;
 }
 .clear-btn:hover {
   background: #c0392b;
 }
 
-/* Light-blue button (za 'Reopen') */
-.light-blue-btn {
-  background: #cce5ff; 
-  color: #333;
-  border: 1px solid #99ccff;
+/* Helper klasa za skrivanje */
+.hidden {
+  display: none;
 }
