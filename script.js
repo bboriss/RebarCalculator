@@ -2,20 +2,29 @@ document.addEventListener('DOMContentLoaded', () => {
   const calcContainer = document.getElementById('calcContainer');
   const addCalcBtn = document.getElementById('addCalcBtn');
   const resetAllBtn = document.getElementById('resetAllBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const importBtn = document.getElementById('importJsonBtn');
+  const importInput = document.getElementById('importJsonInput');
 
-  // Priority distances in mm:
-  const PRIORITY_DISTANCES = [125, 150, 200, 250];
+  // Modal elementi
+  const modalOverlay = document.getElementById('modalOverlay');
+  const exportFileNameInput = document.getElementById('exportFileName');
+  const modalCancelBtn = document.getElementById('modalCancelBtn');
+  const modalOkBtn = document.getElementById('modalOkBtn');
 
-  // Global data
+  // Ovde definišemo koji prečnici su dozvoljeni u "inicijalnoj" pretrazi:
+  const ALLOWED_DIAMETERS = [8, 10, 12, 16, 20];
+  // Ovde definišemo koje su "primarne" distance za inicijalnu pretragu:
+  const ALLOWED_DISTANCES = [250, 225, 200, 175, 150, 125, 100, 300];
+
   let allData = [];
-  let priorityData = [];
   let allDiameters = new Set();
 
   // 1) Učitavamo JSON
   fetch('series.json')
     .then(resp => resp.json())
     .then(raw => {
-      // Transformišemo distance => mm (ako treba *10)
+      // Transformišemo distance => mm
       allData = raw.map(item => {
         const distanceMm = Math.round(item.distance * 10);
         return {
@@ -24,18 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
           area_mm2: item.area_mm2
         };
       });
-      // Filtriramo prioritet
-      priorityData = allData.filter(x => PRIORITY_DISTANCES.includes(x.distanceMm));
-      // Skupimo sve diameters
+
+      // Skupimo sve dijametre (za Refine)
       allData.forEach(x => allDiameters.add(x.diameter));
 
-      // Omogući +Add
+      // Omogućimo +Add
       addCalcBtn.disabled = false;
 
       // 2) Load iz localStorage
       const loaded = loadStateFromLocalStorage();
       if (!loaded) {
-        // Ako ništa nema, kreiraj prazan kalkulator
         createInitialCalculator();
       }
     })
@@ -46,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const block = createCalculatorBlock();
     calcContainer.appendChild(block);
 
-    // Podrazumevano stavimo area=999999 ili 0 (po želji)
     block.dataset.area = '999999';
     block.dataset.isCollapsed = 'false';
     reorderBlocksByArea();
@@ -57,7 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
   resetAllBtn.addEventListener('click', () => {
     localStorage.removeItem('calcBlocks');
     calcContainer.innerHTML = '';
-    createInitialCalculator();
+    createInitialCalculator();  // Uvek ostaje bar 1 kalkulator
+    // createInitialCalculator() će na kraju pozvati saveAllCalculatorsToLocalStorage
   });
 
   function createInitialCalculator() {
@@ -74,12 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
     blocks.forEach(bl => calcContainer.appendChild(bl));
   }
 
-  // Kreira 1 kalkulator-block
+  // Kreiramo 1 calc-block
   function createCalculatorBlock() {
     const block = document.createElement('div');
     block.classList.add('calc-block');
 
-    // expanded vs collapsed
     const expandedDiv = document.createElement('div');
     const collapsedDiv = document.createElement('div');
     collapsedDiv.classList.add('collapsed-row','hidden');
@@ -174,28 +180,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let userArea = 0;
 
-    // "Find" click
+    // Filtriramo i prečnike i distance (inicijalna pretraga)
     findBtn.addEventListener('click', () => {
-      userArea = parseInt(areaInput.value,10);
-      if(!userArea || userArea<=0){
+      userArea = parseInt(areaInput.value, 10);
+      if(!userArea || userArea <= 0){
         alert('Enter a valid area in mm²');
         return;
       }
-      // Filtriramo priority
-      let filtered = priorityData.filter(x => x.area_mm2 >= userArea);
 
-      // Sort
-      filtered.sort((a,b) => {
+      // Filtriramo po area >= userArea, ALLOWED_DIAMETERS, ALLOWED_DISTANCES
+      let filtered = allData.filter(x =>
+        x.area_mm2 >= userArea &&
+        ALLOWED_DIAMETERS.includes(x.diameter) &&
+        ALLOWED_DISTANCES.includes(x.distanceMm)
+      );
+
+      filtered.sort((a, b) => {
         const diffA = a.area_mm2 - userArea;
         const diffB = b.area_mm2 - userArea;
-        if(diffA!==diffB) return diffA-diffB;
+        if(diffA !== diffB) return diffA - diffB;
         return b.distanceMm - a.distanceMm;
       });
+
       const top5 = filtered.slice(0,5);
       renderResults(top5, firstResultsUl);
 
-      // Ako ima makar 1 rezultat => prikaži Collapse dugme
-      if(top5.length>0){
+      if(top5.length > 0){
         collapseBtn.classList.remove('hidden');
       } else {
         collapseBtn.classList.add('hidden');
@@ -204,14 +214,15 @@ document.addEventListener('DOMContentLoaded', () => {
       block.dataset.area = userArea.toString();
       reorderBlocksByArea();
 
-      // Podesi refine
+      // U Refine i dalje imamo sve dijametre i distance
       setupRefineSelects();
       saveAllCalculatorsToLocalStorage();
     });
 
     function setupRefineSelects() {
+      // Distances
       refineDistanceSelect.innerHTML = '<option value="">Any distance</option>';
-      const distArr = Array.from(new Set(allData.map(x => x.distanceMm))).sort((a,b)=>a-b);
+      const distArr = Array.from(new Set(allData.map(x => x.distanceMm))).sort((a, b) => a - b);
       distArr.forEach(d => {
         const opt = document.createElement('option');
         opt.value = d;
@@ -220,8 +231,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       clearDistanceBtn.style.display = 'none';
 
+      // Diameters
       refineDiameterSelect.innerHTML = '<option value="">Any diameter</option>';
-      const diamArr = Array.from(allDiameters).sort((a,b)=>a-b);
+      const diamArr = Array.from(allDiameters).sort((a, b) => a - b);
       diamArr.forEach(d => {
         const opt = document.createElement('option');
         opt.value = d;
@@ -259,22 +271,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function doRefine() {
-      // Filtriramo allData => area>=userArea
-      let arr = allData.filter(x=> x.area_mm2>=userArea);
+      // U Adjust search => prikazujemo sve prečnike/distance
+      let arr = allData.filter(x => x.area_mm2 >= userArea);
 
       const distVal = refineDistanceSelect.value;
       const diamVal = refineDiameterSelect.value;
       if(distVal){
-        arr = arr.filter(x => x.distanceMm===Number(distVal));
+        arr = arr.filter(x => x.distanceMm === Number(distVal));
       }
       if(diamVal){
-        arr = arr.filter(x => x.diameter===Number(diamVal));
+        arr = arr.filter(x => x.diameter === Number(diamVal));
       }
 
-      arr.sort((a,b)=>{
+      arr.sort((a, b) => {
         const diffA = a.area_mm2 - userArea;
         const diffB = b.area_mm2 - userArea;
-        if(diffA!==diffB) return diffA-diffB;
+        if(diffA !== diffB) return diffA - diffB;
         return b.distanceMm - a.distanceMm;
       });
       const top5 = arr.slice(0,5);
@@ -283,7 +295,6 @@ document.addEventListener('DOMContentLoaded', () => {
       saveAllCalculatorsToLocalStorage();
     }
 
-    // COLLAPSE
     collapseBtn.addEventListener('click', () => {
       expandedDiv.classList.add('hidden');
       collapsedDiv.classList.remove('hidden');
@@ -293,7 +304,6 @@ document.addEventListener('DOMContentLoaded', () => {
       saveAllCalculatorsToLocalStorage();
     });
 
-    // REOPEN
     reopenBtn.addEventListener('click', () => {
       collapsedDiv.classList.add('hidden');
       expandedDiv.classList.remove('hidden');
@@ -301,16 +311,20 @@ document.addEventListener('DOMContentLoaded', () => {
       saveAllCalculatorsToLocalStorage();
     });
 
-    // DELETE
+    // Klik na X => brisanje
     deleteBtn.addEventListener('click', () => {
       block.remove();
+
+      // Ako nema ni jednog blocka, kreiramo novi
+      if (calcContainer.children.length === 0) {
+        createInitialCalculator();
+      }
       saveAllCalculatorsToLocalStorage();
     });
 
     return block;
   }
 
-  // RENDER RESULTS
   function renderResults(list, ul) {
     ul.innerHTML = '';
     if(!list.length){
@@ -336,7 +350,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // fillSummary => isto sto radimo u collapse
   function fillSummary(summarySpan, userArea, ul) {
     let text = `Area=<span style="color:red; font-weight:bold;">${userArea} mm²</span>; Results: `;
     const selectedLi = ul.querySelector('li.selected');
@@ -365,15 +378,24 @@ document.addEventListener('DOMContentLoaded', () => {
       return { area, isCollapsed, selectedText };
     });
     localStorage.setItem('calcBlocks', JSON.stringify(toSave));
+
+    // Posle svakog snimanja, ažuriramo vidljivost reset i export dugmadi
+    updateUIButtonsVisibility();
   }
 
   // LocalStorage - LOAD
   function loadStateFromLocalStorage(){
     const stored = localStorage.getItem('calcBlocks');
-    if(!stored) return false;
+    if(!stored) {
+      updateUIButtonsVisibility();
+      return false;
+    }
 
     const arr = JSON.parse(stored);
-    if(!Array.isArray(arr) || arr.length===0) return false;
+    if(!Array.isArray(arr) || arr.length===0) {
+      updateUIButtonsVisibility();
+      return false;
+    }
 
     arr.forEach(obj=>{
       const block = createCalculatorBlock();
@@ -382,14 +404,12 @@ document.addEventListener('DOMContentLoaded', () => {
       block.dataset.area = obj.area.toString();
       block.dataset.isCollapsed = obj.isCollapsed?'true':'false';
 
-      // Upis u input pa "Find"
       if(obj.area>0){
         const areaInput = block.querySelector('#areaInput');
         areaInput.value = obj.area;
         const findBtn = block.querySelector('#findBtn');
-        findBtn.click(); // generisemo initial results
+        findBtn.click();
 
-        // Selektovani li
         if(obj.selectedText){
           const lis = block.querySelectorAll('.first-iteration ul li');
           lis.forEach(li=>{
@@ -402,14 +422,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Ako je collapsed
       if(obj.isCollapsed){
         const expandedDiv = block.querySelector('.calc-block > div:nth-child(1)');
         const collapsedDiv = block.querySelector('.collapsed-row');
         expandedDiv.classList.add('hidden');
         collapsedDiv.classList.remove('hidden');
 
-        // Ispunimo summarySpan isto kao collapse
         const summarySpan = collapsedDiv.querySelector('span');
         const firstResultsUl = block.querySelector('#firstResults');
         fillSummary(summarySpan, obj.area, firstResultsUl);
@@ -417,7 +435,105 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     reorderBlocksByArea();
+    updateUIButtonsVisibility();
     return true;
   }
 
+  // Pokaži ili sakrij dugmad "Reset All" i "Export"
+  function updateUIButtonsVisibility() {
+    const stored = localStorage.getItem('calcBlocks');
+    if(!stored) {
+      resetAllBtn.classList.add('hidden');
+      exportBtn.classList.add('hidden');
+      return;
+    }
+    const arr = JSON.parse(stored);
+    if(!Array.isArray(arr) || arr.length === 0) {
+      resetAllBtn.classList.add('hidden');
+      exportBtn.classList.add('hidden');
+    } else {
+      resetAllBtn.classList.remove('hidden');
+      exportBtn.classList.remove('hidden');
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////////
+  //               MODAL za Export + Import (Drag & Drop)                  //
+  //////////////////////////////////////////////////////////////////////////
+
+  // EXPORT - otvaramo modal
+  exportBtn.addEventListener('click', () => {
+    // default je prazno polje
+    exportFileNameInput.value = "";
+    modalOverlay.classList.remove('hidden');
+  });
+
+  // CANCEL - sakrij modal
+  modalCancelBtn.addEventListener('click', () => {
+    modalOverlay.classList.add('hidden');
+  });
+
+  // OK - uzmemo ime fajla i exportujemo
+  modalOkBtn.addEventListener('click', () => {
+    const userFileName = exportFileNameInput.value.trim() || 'untitled';
+    exportCalcBlocks(userFileName);
+    modalOverlay.classList.add('hidden');
+  });
+
+  function exportCalcBlocks(fileName) {
+    const dataStr = localStorage.getItem('calcBlocks') || '[]';
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    // Napravimo <a> i simuliramo klik
+    const a = document.createElement('a');
+    a.href = url;
+    // Ako user nije dodao .json, mi ga dodajemo
+    a.download = fileName.endsWith('.json') ? fileName : (fileName + '.json');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // IMPORT (Input file)
+  importBtn.addEventListener('click', () => {
+    importInput.click();
+  });
+
+  importInput.addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      importCalcBlocksFromFile(file);
+      importInput.value = '';
+    }
+  });
+
+  function importCalcBlocksFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const jsonData = JSON.parse(e.target.result);
+        localStorage.setItem('calcBlocks', JSON.stringify(jsonData));
+        resetAllAndLoad();
+      } catch (err) {
+        alert('Invalid JSON format!');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // DRAG & DROP (opciono)
+  document.addEventListener('dragover', (e) => e.preventDefault());
+  document.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      importCalcBlocksFromFile(e.dataTransfer.files[0]);
+    }
+  });
+
+  function resetAllAndLoad() {
+    calcContainer.innerHTML = '';
+    loadStateFromLocalStorage();
+  }
 });

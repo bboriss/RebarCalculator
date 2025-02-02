@@ -19,10 +19,29 @@
     <!-- Dinamički kalkulatori -->
     <div id="calcContainer"></div>
 
-    <!-- Donji row sa dugmadima -->
+    <!-- Donji row sa dugmadima.
+         ResetAll i Export su inicijalno sakriveni (class="hidden"). -->
     <div class="bottom-btns-row">
       <button id="addCalcBtn" class="btn red-btn" disabled>+ Add New Calculator</button>
-      <button id="resetAllBtn" class="btn red-btn">Reset All</button>
+      <button id="resetAllBtn" class="btn red-btn hidden">Reset All</button>
+
+      <!-- Export / Import, Export je takođe init sakriven -->
+      <button id="exportBtn" class="btn red-btn hidden">Export</button>
+      <button id="importJsonBtn" class="btn red-btn">Import</button>
+      <input type="file" id="importJsonInput" accept=".json" style="display:none;">
+    </div>
+  </div>
+
+  <!-- MODAL za export -->
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>Enter File Name for Export</h3>
+      <!-- default je prazno polje -->
+      <input type="text" id="exportFileName" placeholder="ProjectName" />
+      <div class="modal-buttons">
+        <button id="modalCancelBtn" class="btn light-blue-btn">Cancel</button>
+        <button id="modalOkBtn" class="btn red-btn">OK</button>
+      </div>
     </div>
   </div>
 

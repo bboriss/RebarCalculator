@@ -73,8 +73,6 @@ h1 {
     transform: translateY(-5px);
   }
 }
-
-/* Ako elementu dodelimo .fade-out, pokreće se fadeOut */
 .fade-out {
   animation: fadeOut 0.3s ease-in forwards;
 }
@@ -135,28 +133,20 @@ h1 {
 .btn:hover {
   opacity: 0.9;
 }
-
-/* Primarna plava (umesto "calculate-btn" ili "red-btn") */
 .primary {
   background-color: #608BC1;
 }
-
-/* Recimo crvena za brisanje (remove-btn) */
 .remove-btn {
   background-color: #ee5253;
   color: #fff;
 }
-
-/* Ako koristite klasu .red-btn, možemo je mapirati na primary ili remove, po želji */
 .red-btn {
   background-color: #608BC1;
 }
-
-/* Example za findBtn ili calculate */
 #findBtn {
   display: inline-block;
   padding: 7px 10px;
-  background-color: #608BC1; /* Isto kao dugmad "Add New Calculator" */
+  background-color: #608BC1;
   color: #fff;
   border: none;
   border-radius: 5px;
@@ -166,7 +156,7 @@ h1 {
   transition: background 0.2s ease, opacity 0.2s ease;
 }
 #findBtn:hover {
-  background-color: #4a6fa5; /* Tamnija nijansa pri hoveru */
+  background-color: #4a6fa5;
 }
 
 /* Light-blue */
@@ -176,7 +166,6 @@ h1 {
   border: 1px solid #99ccff;
 }
 
-/* Drugi row: results i sl. (vec obuhvaceno) */
 /* result items */
 .result-item {
   background: #ececec;
@@ -192,8 +181,6 @@ h1 {
 .result-item.selected {
   background: #fae4e4; /* svetlo zuta kad je selektovan */
 }
-
-/* Samo .series-code crveno */
 .result-item.selected .series-code {
   color: #d21f3c;
   font-weight: bold;
@@ -246,5 +233,61 @@ h1 {
 
 /* Helper klasa za skrivanje */
 .hidden {
-  display: none;
+  display: none !important;
+}
+
+/* Uklanjanje bullet-tačaka iz UL listi */
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* *******************
+   MODAL i OVERLAY
+   ******************* */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.4);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999; /* da bude iznad svega */
+}
+
+.modal {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  max-width: 80%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.modal h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.modal input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+}
+.modal-buttons button {
+  margin-left: 8px;
 }
