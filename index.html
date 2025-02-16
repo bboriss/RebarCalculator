@@ -13,14 +13,18 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- Dugme u gornjem desnom uglu za prikaz tabele površina -->
+  <div id="rebarAreasBtn" class="top-right-btn">
+    Single rebar areas
+  </div>
+
   <div class="container">
     <h1>Rebar Series Calculator</h1>
 
     <!-- Dinamički kalkulatori -->
     <div id="calcContainer"></div>
 
-    <!-- Donji row sa dugmadima.
-         ResetAll i Export su inicijalno sakriveni (class="hidden"). -->
+    <!-- Donji row sa dugmadima. ResetAll i Export su inicijalno sakriveni (class="hidden"). -->
     <div class="bottom-btns-row">
       <button id="addCalcBtn" class="btn red-btn" disabled>+ Add New Calculator</button>
       <button id="resetAllBtn" class="btn red-btn hidden">Reset All</button>
@@ -42,6 +46,42 @@
         <button id="modalCancelBtn" class="btn light-blue-btn">Cancel</button>
         <button id="modalOkBtn" class="btn red-btn">OK</button>
       </div>
+    </div>
+  </div>
+
+  <!-- NOVI MODAL za prikaz tabele površina (bez Close dugmeta) -->
+  <div id="singleRebarModalOverlay" class="modal-overlay hidden">
+    <div class="modal single-rebar-modal">
+      <h3>Single Rebar Areas (mm²)</h3>
+      <!-- Skratili kolonu za broj šipki na "n", i nema ∅6, 14, 18, 22 -->
+      <table class="rebar-table">
+        <thead>
+          <tr>
+            <th>n</th>
+            <th>Φ8</th>
+            <th>Φ10</th>
+            <th>Φ12</th>
+            <th>Φ16</th>
+            <th>Φ20</th>
+            <th>Φ25</th>
+            <th>Φ28</th>
+            <th>Φ32</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>50</td><td>79</td><td>113</td><td>201</td><td>314</td><td>491</td><td>616</td><td>804</td></tr>
+          <tr><td>2</td><td>101</td><td>157</td><td>226</td><td>402</td><td>628</td><td>982</td><td>1232</td><td>1608</td></tr>
+          <tr><td>3</td><td>151</td><td>236</td><td>339</td><td>603</td><td>942</td><td>1473</td><td>1847</td><td>2413</td></tr>
+          <tr><td>4</td><td>201</td><td>314</td><td>452</td><td>804</td><td>1257</td><td>1963</td><td>2463</td><td>3217</td></tr>
+          <tr><td>5</td><td>251</td><td>393</td><td>565</td><td>1005</td><td>1571</td><td>2454</td><td>3079</td><td>4021</td></tr>
+          <tr><td>6</td><td>302</td><td>471</td><td>679</td><td>1206</td><td>1885</td><td>2945</td><td>3695</td><td>4825</td></tr>
+          <tr><td>7</td><td>352</td><td>550</td><td>792</td><td>1407</td><td>2199</td><td>3436</td><td>4310</td><td>5630</td></tr>
+          <tr><td>8</td><td>402</td><td>628</td><td>905</td><td>1608</td><td>2513</td><td>3927</td><td>4926</td><td>6434</td></tr>
+          <tr><td>9</td><td>452</td><td>707</td><td>1018</td><td>1810</td><td>2827</td><td>4418</td><td>5542</td><td>7238</td></tr>
+          <tr><td>10</td><td>503</td><td>785</td><td>1131</td><td>2011</td><td>3142</td><td>4909</td><td>6158</td><td>8042</td></tr>
+        </tbody>
+      </table>
+      <!-- Nema close dugmeta -->
     </div>
   </div>
 

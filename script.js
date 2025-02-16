@@ -6,15 +6,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const importBtn = document.getElementById('importJsonBtn');
   const importInput = document.getElementById('importJsonInput');
 
-  // Modal elementi
+  // Modal za Export
   const modalOverlay = document.getElementById('modalOverlay');
   const exportFileNameInput = document.getElementById('exportFileName');
   const modalCancelBtn = document.getElementById('modalCancelBtn');
   const modalOkBtn = document.getElementById('modalOkBtn');
 
-  // Ovde definišemo koji prečnici su dozvoljeni u "inicijalnoj" pretrazi:
+  // NOVI modal za prikaz tabele površina (bez Close dugmeta)
+  const rebarAreasBtn = document.getElementById('rebarAreasBtn');
+  const singleRebarModalOverlay = document.getElementById('singleRebarModalOverlay');
+
+  // Klik na "Single rebar areas" => otvaranje novog modala
+  rebarAreasBtn.addEventListener('click', () => {
+    singleRebarModalOverlay.classList.remove('hidden');
+  });
+
+  // Klik na overlay (sa strane) zatvara modal
+  singleRebarModalOverlay.addEventListener('click', (e) => {
+    if (e.target === singleRebarModalOverlay) {
+      singleRebarModalOverlay.classList.add('hidden');
+    }
+  });
+
+  // Dozvoljeni prečnici (za inicijalnu pretragu)
   const ALLOWED_DIAMETERS = [8, 10, 12, 16, 20];
-  // Ovde definišemo koje su "primarne" distance za inicijalnu pretragu:
+  // Dozvoljene distance (mm)
   const ALLOWED_DISTANCES = [250, 225, 200, 175, 150, 125, 100, 300];
 
   let allData = [];
@@ -180,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let userArea = 0;
 
-    // Filtriramo i prečnike i distance (inicijalna pretraga)
+    // Inicijalna pretraga
     findBtn.addEventListener('click', () => {
       userArea = parseInt(areaInput.value, 10);
       if(!userArea || userArea <= 0){
@@ -195,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ALLOWED_DISTANCES.includes(x.distanceMm)
       );
 
+      // Sortiramo: prvo najbliže area, pa distance opadajuće
       filtered.sort((a, b) => {
         const diffA = a.area_mm2 - userArea;
         const diffB = b.area_mm2 - userArea;
@@ -271,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function doRefine() {
-      // U Adjust search => prikazujemo sve prečnike/distance
+      // U "Adjust search" => prikazujemo sve prečnike/distance
       let arr = allData.filter(x => x.area_mm2 >= userArea);
 
       const distVal = refineDistanceSelect.value;
@@ -379,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     localStorage.setItem('calcBlocks', JSON.stringify(toSave));
 
-    // Posle svakog snimanja, ažuriramo vidljivost reset i export dugmadi
+    // Ažuriramo vidljivost reset i export dugmadi
     updateUIButtonsVisibility();
   }
 
@@ -485,10 +502,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 
-    // Napravimo <a> i simuliramo klik
     const a = document.createElement('a');
     a.href = url;
-    // Ako user nije dodao .json, mi ga dodajemo
     a.download = fileName.endsWith('.json') ? fileName : (fileName + '.json');
     document.body.appendChild(a);
     a.click();
@@ -523,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsText(file);
   }
 
-  // DRAG & DROP (opciono)
+  // DRAG & DROP
   document.addEventListener('dragover', (e) => e.preventDefault());
   document.addEventListener('drop', (e) => {
     e.preventDefault();
